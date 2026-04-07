@@ -1,0 +1,61 @@
+services:
+  broker:
+    build: .
+    container_name: broker
+    command: python -m broker.broker
+    ports:
+      - "5001:5001/udp"
+      - "5002:5002"
+    networks:
+      - iot_net
+
+  sensor_temp:
+    build: .
+    container_name: sensor_temp
+    command: python sensors/sensor_temp.py
+    depends_on:
+      - broker
+    networks:
+      - iot_net
+
+  sensor_fumaca:
+    build: .
+    container_name: sensor_fumaca
+    command: python sensors/sensor_fumaca.py
+    depends_on:
+      - broker
+    networks:
+      - iot_net
+
+  atuador_aquecedor:
+    build: .
+    container_name: atuador_aquecedor
+    command: python actuators/atuador_aquecedor.py
+    depends_on:
+      - broker
+    networks:
+      - iot_net
+
+  atuador_exaustor:
+    build: .
+    container_name: atuador_exaustor
+    command: python actuators/atuador_exaustor.py
+    depends_on:
+      - broker
+    networks:
+      - iot_net
+
+  client:
+    build: .
+    container_name: client
+    command: python client/client.py
+    depends_on:
+      - broker
+    stdin_open: true
+    tty: true
+    networks:
+      - iot_net
+
+networks:
+  iot_net:
+    driver: bridge
