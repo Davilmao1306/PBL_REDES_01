@@ -6,11 +6,11 @@ from shared.protocol import recv_tcp_message, send_tcp_message
 
 BROKER_HOST = os.getenv("BROKER_HOST", "broker")
 BROKER_TCP_PORT = 5002
+SOCKET_TIMEOUT = 5.0
 
 
 def send_message(message: str) -> str:
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect((BROKER_HOST, BROKER_TCP_PORT))
+    sock = socket.create_connection((BROKER_HOST, BROKER_TCP_PORT), timeout=SOCKET_TIMEOUT)
 
     send_tcp_message(sock, message)
     response = recv_tcp_message(sock)

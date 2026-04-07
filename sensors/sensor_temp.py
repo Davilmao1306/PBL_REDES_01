@@ -8,6 +8,7 @@ from shared.protocol import recv_tcp_message, send_tcp_message
 BROKER_HOST = os.getenv("BROKER_HOST", "broker")
 BROKER_TCP_PORT = 5002
 BROKER_UDP_PORT = 5001
+SOCKET_TIMEOUT = 5.0
 
 SENSOR_ID = "sensor_temp"
 SENSOR_TYPE = "temperatura"
@@ -15,8 +16,9 @@ SENSOR_TYPE = "temperatura"
 
 def register_sensor():
     try:
-        tcp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        tcp_sock.connect((BROKER_HOST, BROKER_TCP_PORT))
+        tcp_sock = socket.create_connection(
+            (BROKER_HOST, BROKER_TCP_PORT), timeout=SOCKET_TIMEOUT
+        )
 
         send_tcp_message(tcp_sock, "REGISTER_SENSOR", SENSOR_ID, SENSOR_TYPE)
 

@@ -5,6 +5,7 @@ from shared.protocol import parse_message, recv_tcp_message, send_tcp_message
 
 BROKER_HOST = os.getenv("BROKER_HOST", "broker")
 BROKER_TCP_PORT = 5002
+SOCKET_TIMEOUT = 5.0
 
 ACTUATOR_ID = "atuador_aquecedor"
 ACTUATOR_TYPE = "aquecedor"
@@ -13,8 +14,8 @@ ACTUATOR_TYPE = "aquecedor"
 def main():
     state = "OFF"
 
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect((BROKER_HOST, BROKER_TCP_PORT))
+    sock = socket.create_connection((BROKER_HOST, BROKER_TCP_PORT), timeout=SOCKET_TIMEOUT)
+    sock.settimeout(None)
 
     send_tcp_message(sock, "REGISTER_ACTUATOR", ACTUATOR_ID, ACTUATOR_TYPE)
 

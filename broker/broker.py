@@ -9,6 +9,8 @@ UDP_PORT = 5001
 
 TCP_HOST = "0.0.0.0"
 TCP_PORT = 5002
+SENSOR_TIMEOUT = 3.0
+CONTROL_TIMEOUT = 5.0
 
 # Estruturas em memória
 sensors = {}
@@ -16,6 +18,14 @@ actuators = {}
 
 # Lock para evitar problemas de concorrência
 data_lock = threading.Lock()
+
+
+def sensor_status(info):
+    """Marca sensor como offline quando a telemetria para de chegar."""
+    last_update = info["last_update"]
+    if last_update is not None and time.time() - last_update > SENSOR_TIMEOUT:
+        return "OFFLINE"
+    return info["status"]
 
 
 def register_sensor(sensor_id, sensor_type, addr):
@@ -69,6 +79,7 @@ def list_sensors():
 
         items = []
         for sensor_id, info in sensors.items():
+            info["status"] = sensor_status(info)
             items.append(
                 f"{sensor_id},{info['type']},{info['value']},{info['status']}"
             )
@@ -94,6 +105,7 @@ def get_sensor(sensor_id):
             return build_message("ERROR", "sensor_nao_encontrado")
 
         info = sensors[sensor_id]
+        info["status"] = sensor_status(info)
         return build_message(
             "SENSOR",
             sensor_id,
@@ -134,8 +146,11 @@ def send_command_to_actuator(actuator_id, command):
 
     try:
         with actuator_lock:
+            old_timeout = conn.gettimeout()
+            conn.settimeout(CONTROL_TIMEOUT)
             send_tcp_message(conn, "EXECUTE", command)
             response = recv_tcp_message(conn)
+            conn.settimeout(old_timeout)
         parts = parse_message(response)
 
         if len(parts) >= 2 and parts[0] == "OK":
@@ -148,6 +163,10 @@ def send_command_to_actuator(actuator_id, command):
 
     except Exception as e:
         print(f"[BROKER] Erro ao enviar comando ao atuador {actuator_id}: {e}")
+        try:
+            conn.settimeout(None)
+        except Exception:
+            pass
         with data_lock:
             actuators[actuator_id]["status"] = "OFFLINE"
         return build_message("ERROR", "atuador_offline")
