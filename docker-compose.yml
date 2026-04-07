@@ -12,7 +12,7 @@ services:
   sensor_temp:
     build: .
     container_name: sensor_temp
-    command: python sensors/sensor_temp.py
+    command: python -m sensors.sensor_temp
     depends_on:
       - broker
     networks:
@@ -21,7 +21,7 @@ services:
   sensor_fumaca:
     build: .
     container_name: sensor_fumaca
-    command: python sensors/sensor_fumaca.py
+    command: python -m sensors.sensor_fumaca
     depends_on:
       - broker
     networks:
@@ -30,7 +30,7 @@ services:
   atuador_aquecedor:
     build: .
     container_name: atuador_aquecedor
-    command: python actuators/atuador_aquecedor.py
+    command: python -m actuators.atuador_aquecedor
     depends_on:
       - broker
     networks:
@@ -39,7 +39,7 @@ services:
   atuador_exaustor:
     build: .
     container_name: atuador_exaustor
-    command: python actuators/atuador_exaustor.py
+    command: python -m actuators.atuador_exaustor
     depends_on:
       - broker
     networks:
@@ -48,7 +48,7 @@ services:
   client:
     build: .
     container_name: client
-    command: python client/client.py
+    command: python -m client.client
     depends_on:
       - broker
     stdin_open: true
