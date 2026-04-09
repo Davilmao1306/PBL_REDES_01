@@ -5,6 +5,128 @@ atuadores e aplicacoes cliente. A comunicacao foi implementada diretamente com
 sockets TCP/UDP da arquitetura da Internet, sem MQTT, AMQP, Kafka, RabbitMQ ou
 outro framework de troca de mensagens.
 
+## Informacoes para avaliacao
+
+### Pacotes e bibliotecas
+
+O projeto foi implementado em Python 3.11.
+
+Bibliotecas usadas:
+
+- `socket`: comunicacao TCP e UDP;
+- `threading`: concorrencia no broker;
+- `time`: temporizacao e timeout;
+- `random`: geracao de valores simulados dos sensores;
+- `os`: leitura de variaveis de ambiente;
+- `subprocess`, `pathlib`, `sys`: usados apenas nos testes.
+
+Nao ha dependencias externas obrigatorias. Por isso o arquivo `requirements.txt`
+esta vazio e a aplicacao funciona apenas com a biblioteca padrao do Python.
+
+### Estrutura de diretorios
+
+```text
+iot_forno/
+|-- actuators/
+|   |-- atuador_aquecedor.py
+|   `-- atuador_exaustor.py
+|-- broker/
+|   `-- broker.py
+|-- client/
+|   `-- client.py
+|-- sensors/
+|   |-- sensor_fumaca.py
+|   `-- sensor_temp.py
+|-- shared/
+|   `-- protocol.py
+|-- tests/
+|   `-- integration_test.py
+|-- .dockerignore
+|-- docker-compose.yml
+|-- Dockerfile
+|-- README.md
+`-- requirements.txt
+```
+
+Resumo dos diretorios:
+
+- `broker/`: servico de integracao;
+- `sensors/`: sensores virtuais;
+- `actuators/`: atuadores virtuais;
+- `client/`: interface de terminal;
+- `shared/`: funcoes do protocolo;
+- `tests/`: testes automatizados.
+
+### Como executar
+
+1. Abrir o projeto:
+
+```bash
+git clone https://github.com/Davilmao1306/PBL_REDES_01.git
+cd PBL_REDES_01
+```
+
+2. Construir as imagens Docker:
+
+```bash
+docker compose build
+```
+
+3. Subir broker, sensores e atuadores:
+
+```bash
+docker compose up broker sensor_temp sensor_fumaca atuador_aquecedor atuador_exaustor
+```
+
+4. Em outro terminal, abrir o cliente:
+
+```bash
+docker compose run --rm client
+```
+
+Para encerrar:
+
+```bash
+docker compose down
+```
+
+### Como usar
+
+No cliente, as opcoes disponiveis sao:
+
+- `1`: listar sensores;
+- `2`: listar atuadores;
+- `3`: consultar um sensor;
+- `4`: consultar um atuador;
+- `5`: enviar comando para atuador;
+- `6`: monitorar sensor em tempo real;
+- `0`: encerrar o cliente.
+
+IDs padrao:
+
+- Sensores: `sensor_temp`, `sensor_fumaca`;
+- Atuadores: `atuador_aquecedor`, `atuador_exaustor`.
+
+Comandos aceitos:
+
+- `atuador_aquecedor`: `ON`, `OFF`, `DESLIGAR`;
+- `atuador_exaustor`: `ON`, `OFF`, `ACIONAR_ALARME`.
+
+### Dockerfile
+
+O `Dockerfile` foi preparado para facilitar a avaliacao dos tutores.
+
+Ele contem:
+
+- imagem base `python:3.11-slim`;
+- definicao de `WORKDIR /app`;
+- configuracoes de ambiente `PYTHONUNBUFFERED=1` e
+  `PYTHONDONTWRITEBYTECODE=1`;
+- copia do codigo-fonte para dentro do conteiner;
+- instalacao de bibliotecas com `pip install -r requirements.txt`;
+- etapa de validacao/compilacao com `python -m compileall ...`;
+- comando padrao `python -m broker.broker`.
+
 ## 1. Arquitetura
 
 O sistema foi dividido em quatro grupos de componentes:
