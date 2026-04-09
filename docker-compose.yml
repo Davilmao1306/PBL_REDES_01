@@ -4,7 +4,7 @@ services:
     container_name: broker
     command: python -m broker.broker
     ports:
-      - "5001:5001/udp"
+      - "6001:6001/udp"
       - "5002:5002"
     networks:
       - iot_net
